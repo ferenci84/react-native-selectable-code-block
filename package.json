@@ -1,7 +1,6 @@
 {
   "name": "@ferenci84/react-native-selectable-code-block",
   "version": "0.1.0",
-  "type": "module",
   "description": "Selectable native code block renderer for React Native",
   "main": "./lib/module/index.js",
   "react-native": "./src/index.tsx",
