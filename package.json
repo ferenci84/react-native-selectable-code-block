@@ -4,6 +4,7 @@
   "type": "module",
   "description": "Selectable native code block renderer for React Native",
   "main": "./lib/module/index.js",
+  "react-native": "./src/index.tsx",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
     ".": {
