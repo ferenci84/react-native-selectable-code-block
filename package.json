@@ -1,0 +1,67 @@
+{
+  "name": "@ferenci84/react-native-selectable-code-block",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Selectable native code block renderer for React Native",
+  "main": "./lib/module/index.js",
+  "types": "./lib/typescript/src/index.d.ts",
+  "exports": {
+    ".": {
+      "source": "./src/index.tsx",
+      "types": "./lib/typescript/src/index.d.ts",
+      "default": "./lib/module/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "lib",
+    "android",
+    "ios",
+    "*.podspec",
+    "react-native.config.js",
+    "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*"
+  ],
+  "keywords": [
+    "react-native",
+    "code",
+    "selection",
+    "syntax-highlighting"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ferenci84/react-native-selectable-code-block.git"
+  },
+  "author": "Ferenc Izso",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ferenci84/react-native-selectable-code-block/issues"
+  },
+  "homepage": "https://github.com/ferenci84/react-native-selectable-code-block#readme",
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "codegenConfig": {
+    "name": "SelectableCodeBlockViewSpec",
+    "type": "all",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "com.selectablecodeblock"
+    },
+    "ios": {
+      "componentProvider": {
+        "SelectableCodeBlockView": "SelectableCodeBlockView"
+      }
+    }
+  }
+}
