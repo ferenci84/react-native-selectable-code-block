@@ -43,7 +43,7 @@ Size SelectableCodeBlockViewMeasurementManager::measure(
               jfloat)>("measure");
 
   local_ref<JString> componentName = make_jstring("SelectableCodeBlockView");
-  folly::dynamic serializedProps = toDynamic(props);
+  folly::dynamic serializedProps = props.getDiffProps(nullptr);
   local_ref<ReadableNativeMap::javaobject> propsRNM = ReadableNativeMap::newObjectCxxArgs(serializedProps);
   local_ref<ReadableMap::javaobject> propsRM =
       make_local(reinterpret_cast<ReadableMap::javaobject>(propsRNM.get()));
