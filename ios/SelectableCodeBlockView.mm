@@ -1,10 +1,10 @@
 #import "SelectableCodeBlockView.h"
 
-#import <react/renderer/components/SelectableCodeBlockViewSpec/ComponentDescriptors.h>
 #import <react/renderer/components/SelectableCodeBlockViewSpec/EventEmitters.h>
 #import <react/renderer/components/SelectableCodeBlockViewSpec/Props.h>
 #import <react/renderer/components/SelectableCodeBlockViewSpec/RCTComponentViewHelpers.h>
 
+#import "SelectableCodeBlockViewComponentDescriptor.h"
 #import "RCTFabricComponentsPlugins.h"
 
 using namespace facebook::react;
@@ -45,6 +45,7 @@ static UIColor *SelectableCodeBlockColorFromString(NSString *colorString, UIColo
   CGFloat _fontSize;
   CGFloat _lineHeight;
   BOOL _selectable;
+  BOOL _wrapLines;
   std::vector<std::string> _menuOptionsVector;
 }
 
@@ -65,6 +66,7 @@ static UIColor *SelectableCodeBlockColorFromString(NSString *colorString, UIColo
     _fontSize = 14.0;
     _lineHeight = 18.0;
     _selectable = YES;
+    _wrapLines = NO;
     _menuOptions = @[@"Copy"];
 
     SelectableCodeTextView *textView = [[SelectableCodeTextView alloc] init];
@@ -77,6 +79,7 @@ static UIColor *SelectableCodeBlockColorFromString(NSString *colorString, UIColo
     _textView.backgroundColor = [UIColor clearColor];
     _textView.textContainerInset = UIEdgeInsetsZero;
     _textView.textContainer.lineFragmentPadding = 0;
+    _textView.textContainer.lineBreakMode = NSLineBreakByClipping;
     _textView.userInteractionEnabled = YES;
     _textView.dataDetectorTypes = UIDataDetectorTypeNone;
     _textView.text = @"";
@@ -99,6 +102,7 @@ static UIColor *SelectableCodeBlockColorFromString(NSString *colorString, UIColo
 {
   [super layoutSubviews];
   _textView.frame = self.bounds;
+  _textView.textContainer.lineBreakMode = _wrapLines ? NSLineBreakByWordWrapping : NSLineBreakByClipping;
 }
 
 - (void)updateProps:(Props::Shared const &)props oldProps:(Props::Shared const &)oldProps
@@ -136,6 +140,12 @@ static UIColor *SelectableCodeBlockColorFromString(NSString *colorString, UIColo
   if (oldViewProps.selectable != newViewProps.selectable) {
     _selectable = newViewProps.selectable;
     _textView.selectable = _selectable;
+  }
+
+  if (oldViewProps.wrapLines != newViewProps.wrapLines) {
+    _wrapLines = newViewProps.wrapLines;
+    _textView.textContainer.lineBreakMode = _wrapLines ? NSLineBreakByWordWrapping : NSLineBreakByClipping;
+    needsTextUpdate = YES;
   }
 
   if (oldViewProps.menuOptions != newViewProps.menuOptions) {
@@ -186,6 +196,7 @@ static UIColor *SelectableCodeBlockColorFromString(NSString *colorString, UIColo
   NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
   paragraphStyle.minimumLineHeight = _lineHeight;
   paragraphStyle.maximumLineHeight = _lineHeight;
+  paragraphStyle.lineBreakMode = _wrapLines ? NSLineBreakByWordWrapping : NSLineBreakByClipping;
 
   NSDictionary *baseAttributes = @{
     NSFontAttributeName: baseFont,

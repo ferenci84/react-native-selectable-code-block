@@ -1,14 +1,20 @@
 package com.selectablecodeblock
 
 import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.common.MapBuilder
 import com.facebook.react.module.annotations.ReactModule
+import com.facebook.react.uimanager.PixelUtil
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.ViewManagerDelegate
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.viewmanagers.SelectableCodeBlockViewManagerDelegate
 import com.facebook.react.viewmanagers.SelectableCodeBlockViewManagerInterface
+import com.facebook.yoga.YogaMeasureMode
+import com.facebook.yoga.YogaMeasureOutput
+import android.content.Context
+import android.view.View
 
 @ReactModule(name = SelectableCodeBlockViewManager.NAME)
 class SelectableCodeBlockViewManager : SimpleViewManager<SelectableCodeBlockView>(),
@@ -54,6 +60,11 @@ class SelectableCodeBlockViewManager : SimpleViewManager<SelectableCodeBlockView
     view.setCodeSelectable(value)
   }
 
+  @ReactProp(name = "wrapLines")
+  override fun setWrapLines(view: SelectableCodeBlockView, value: Boolean) {
+    view.setCodeWrapLines(value)
+  }
+
   @ReactProp(name = "menuOptions")
   override fun setMenuOptions(view: SelectableCodeBlockView, value: ReadableArray?) {
     val options = if (value != null) {
@@ -69,6 +80,45 @@ class SelectableCodeBlockViewManager : SimpleViewManager<SelectableCodeBlockView
     return MapBuilder.builder<String, Any>()
       .put("topSelection", MapBuilder.of("registrationName", "onSelection"))
       .build()
+  }
+
+  override fun measure(
+    context: Context,
+    localData: ReadableMap?,
+    props: ReadableMap?,
+    state: ReadableMap?,
+    width: Float,
+    widthMode: YogaMeasureMode?,
+    height: Float,
+    heightMode: YogaMeasureMode?,
+    attachmentsPositions: FloatArray?,
+  ): Long {
+    val view = SelectableCodeBlockView(context)
+    view.setTokensJson(props?.getString("tokensJson"))
+    view.setCodeFontFamily(props?.getString("fontFamily"))
+    view.setCodeFontSize((props?.getDouble("fontSize") ?: 14.0).toFloat())
+    view.setCodeLineHeight((props?.getDouble("lineHeight") ?: 18.0).toFloat())
+    view.setCodeColor(props?.getString("color"))
+    view.setCodeWrapLines(props?.getBoolean("wrapLines") ?: false)
+
+    view.measure(
+      measureSpec(width, widthMode),
+      measureSpec(height, heightMode),
+    )
+
+    return YogaMeasureOutput.make(
+      PixelUtil.toDIPFromPixel(view.measuredWidth.toFloat()),
+      PixelUtil.toDIPFromPixel(view.measuredHeight.toFloat()),
+    )
+  }
+
+  private fun measureSpec(size: Float, mode: YogaMeasureMode?): Int {
+    val pixelSize = PixelUtil.toPixelFromDIP(size).toInt()
+    return when (mode) {
+      YogaMeasureMode.EXACTLY -> View.MeasureSpec.makeMeasureSpec(pixelSize, View.MeasureSpec.EXACTLY)
+      YogaMeasureMode.AT_MOST -> View.MeasureSpec.makeMeasureSpec(pixelSize, View.MeasureSpec.AT_MOST)
+      else -> View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+    }
   }
 
   companion object {

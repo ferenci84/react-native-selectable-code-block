@@ -20,6 +20,7 @@ export interface SelectableCodeBlockViewProps {
   lineHeight?: number;
   color?: string;
   selectable?: boolean;
+  wrapLines?: boolean;
   menuOptions?: readonly string[];
   onSelection?: (event: SelectionEvent) => void;
   style?: ViewStyle;
@@ -33,6 +34,7 @@ export const SelectableCodeBlockView: React.FC<SelectableCodeBlockViewProps> = (
   lineHeight,
   color,
   selectable = true,
+  wrapLines = false,
   menuOptions = ['Copy'],
   onSelection,
   style,
@@ -78,6 +80,7 @@ export const SelectableCodeBlockView: React.FC<SelectableCodeBlockViewProps> = (
       lineHeight={lineHeight}
       color={color}
       selectable={selectable}
+      wrapLines={wrapLines}
       menuOptions={menuOptions}
       onSelection={Platform.OS === 'ios' ? handleSelection : undefined}
       style={style}

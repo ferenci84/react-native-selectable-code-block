@@ -16,6 +16,7 @@ export interface SelectableCodeBlockViewProps {
     lineHeight?: number;
     color?: string;
     selectable?: boolean;
+    wrapLines?: boolean;
     menuOptions?: readonly string[];
     onSelection?: (event: SelectionEvent) => void;
     style?: ViewStyle;

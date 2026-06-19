@@ -35,12 +35,14 @@ class SelectableCodeBlockView(context: Context) : TextView(context) {
   private var codeLineHeight: Float = 18f
   private var codeColor: String = "#000000"
   private var codeSelectable: Boolean = true
+  private var codeWrapLines: Boolean = false
 
   init {
     includeFontPadding = false
     setTextIsSelectable(true)
     setBackgroundColor(Color.TRANSPARENT)
     typeface = Typeface.MONOSPACE
+    setHorizontallyScrolling(true)
     setupSelectionCallback()
     updateTextContent()
   }
@@ -78,6 +80,11 @@ class SelectableCodeBlockView(context: Context) : TextView(context) {
   fun setCodeSelectable(value: Boolean) {
     codeSelectable = value
     setTextIsSelectable(value)
+  }
+
+  fun setCodeWrapLines(value: Boolean) {
+    codeWrapLines = value
+    setHorizontallyScrolling(!value)
   }
 
   private fun updateTextContent() {

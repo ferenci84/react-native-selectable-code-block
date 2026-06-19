@@ -15,6 +15,10 @@ Pod::Spec.new do |s|
 
   s.source_files = "ios/**/*.{h,m,mm,cpp}"
   s.private_header_files = "ios/**/*.h"
+  s.pod_target_xcconfig = {
+    'HEADER_SEARCH_PATHS' => '"$(PODS_TARGET_SRCROOT)/ios/internals"',
+    'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17'
+  }
 
   install_modules_dependencies(s)
 end

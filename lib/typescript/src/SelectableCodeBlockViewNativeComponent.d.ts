@@ -11,6 +11,7 @@ interface NativeProps extends ViewProps {
     lineHeight?: Float;
     color?: string;
     selectable?: boolean;
+    wrapLines?: boolean;
     menuOptions: readonly string[];
     onSelection?: DirectEventHandler<SelectionEvent>;
 }
