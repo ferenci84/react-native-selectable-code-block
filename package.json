@@ -40,7 +40,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/ferenci84/react-native-selectable-code-block.git"
+    "url": "git+https://github.com/ferenci84/react-native-selectable-code-block.git"
   },
   "author": "Ferenc Izso",
   "license": "MIT",
