@@ -11,6 +11,7 @@
       "types": "./lib/typescript/src/index.d.ts",
       "default": "./lib/module/index.js"
     },
+    "./react-native.config.js": "./react-native.config.js",
     "./package.json": "./package.json"
   },
   "files": [
