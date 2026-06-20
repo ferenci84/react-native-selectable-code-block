@@ -1,0 +1,26 @@
+{
+  "name": "react-native-selectable-code-block-example",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "ios": "react-native run-ios",
+    "android": "react-native run-android",
+    "start": "react-native start",
+    "build:ios": "react-native build-ios --mode Debug",
+    "build:android": "react-native build-android"
+  },
+  "dependencies": {
+    "@ferenci84/react-native-selectable-code-block": "file:..",
+    "react": "19.1.1",
+    "react-native": "0.82.1"
+  },
+  "devDependencies": {
+    "@react-native-community/cli": "20.0.2",
+    "@react-native-community/cli-platform-android": "20.0.2",
+    "@react-native-community/cli-platform-ios": "20.0.2",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

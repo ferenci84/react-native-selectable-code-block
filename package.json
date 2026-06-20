@@ -20,6 +20,7 @@
     "lib",
     "android",
     "ios",
+    "example",
     "*.podspec",
     "react-native.config.js",
     "!ios/build",
