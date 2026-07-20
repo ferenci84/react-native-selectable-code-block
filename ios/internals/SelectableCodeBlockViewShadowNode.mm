@@ -1,7 +1,9 @@
 #include "SelectableCodeBlockViewShadowNode.h"
 
+#import <CoreText/CoreText.h>
 #import <UIKit/UIKit.h>
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 
@@ -83,6 +85,79 @@ static NSAttributedString *attributedStringForProps(const SelectableCodeBlockVie
   return attributedText;
 }
 
+static NSArray<NSAttributedString *> *hardLinesForText(NSAttributedString *attributedText)
+{
+  NSMutableArray<NSAttributedString *> *lines = [[NSMutableArray alloc] init];
+  NSString *plainText = attributedText.string;
+  NSUInteger lineStart = 0;
+
+  for (NSUInteger index = 0; index < plainText.length; index++) {
+    if ([plainText characterAtIndex:index] != '\n') {
+      continue;
+    }
+
+    NSRange lineRange = NSMakeRange(lineStart, index - lineStart);
+    [lines addObject:[attributedText attributedSubstringFromRange:lineRange]];
+    lineStart = index + 1;
+  }
+
+  if (lineStart < plainText.length) {
+    [lines addObject:[attributedText attributedSubstringFromRange:NSMakeRange(lineStart, plainText.length - lineStart)]];
+  } else if (lines.count == 0) {
+    [lines addObject:[[NSAttributedString alloc] initWithString:@""]];
+  }
+
+  return lines;
+}
+
+static Size measureUnwrappedAttributedText(NSAttributedString *attributedText, CGFloat lineHeight)
+{
+  NSArray<NSAttributedString *> *lines = hardLinesForText(attributedText);
+  CGFloat measuredWidth = 0;
+
+  for (NSAttributedString *line in lines) {
+    if (line.length == 0) {
+      continue;
+    }
+
+    CTLineRef ctLine = CTLineCreateWithAttributedString((CFAttributedStringRef)line);
+    CGFloat lineWidth = static_cast<CGFloat>(CTLineGetTypographicBounds(ctLine, nullptr, nullptr, nullptr));
+    measuredWidth = std::max(measuredWidth, std::ceil(lineWidth));
+    CFRelease(ctLine);
+  }
+
+  return Size{
+      static_cast<Float>(std::max<CGFloat>(1, measuredWidth)),
+      static_cast<Float>(std::ceil(std::max<NSUInteger>(static_cast<NSUInteger>(1), lines.count) * lineHeight))};
+}
+
+static Size measureWrappedAttributedText(
+    NSAttributedString *attributedText,
+    CGFloat width,
+    CGFloat lineHeight)
+{
+  NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:attributedText];
+  NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
+  NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(width, CGFLOAT_MAX / 4.0)];
+  textContainer.lineFragmentPadding = 0;
+  textContainer.lineBreakMode = NSLineBreakByWordWrapping;
+
+  [layoutManager addTextContainer:textContainer];
+  [textStorage addLayoutManager:layoutManager];
+  [layoutManager ensureLayoutForTextContainer:textContainer];
+
+  CGRect usedRect = [layoutManager usedRectForTextContainer:textContainer];
+  CGFloat measuredHeight = std::ceil(usedRect.size.height);
+
+  if (measuredHeight <= 0) {
+    measuredHeight = lineHeight;
+  }
+
+  return Size{
+      static_cast<Float>(width),
+      static_cast<Float>(measuredHeight)};
+}
+
 Size SelectableCodeBlockViewShadowNode::measureContent(
     const LayoutContext & /*layoutContext*/,
     const LayoutConstraints &layoutConstraints) const
@@ -94,33 +169,13 @@ Size SelectableCodeBlockViewShadowNode::measureContent(
     return layoutConstraints.clamp(Size{0, static_cast<Float>(effectiveLineHeight(props))});
   }
 
+  const CGFloat lineHeight = effectiveLineHeight(props);
   const bool hasFiniteMaxWidth = std::isfinite(layoutConstraints.maximumSize.width);
-  const CGFloat maxWidth = hasFiniteMaxWidth
-      ? static_cast<CGFloat>(layoutConstraints.maximumSize.width)
-      : CGFLOAT_MAX / 4.0;
-  const CGFloat textContainerWidth = props.wrapLines ? maxWidth : CGFLOAT_MAX / 4.0;
+  Size measuredSize = !props.wrapLines || !hasFiniteMaxWidth
+      ? measureUnwrappedAttributedText(attributedText, lineHeight)
+      : measureWrappedAttributedText(attributedText, layoutConstraints.maximumSize.width, lineHeight);
 
-  NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:attributedText];
-  NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
-  NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(textContainerWidth, CGFLOAT_MAX / 4.0)];
-  textContainer.lineFragmentPadding = 0;
-  textContainer.lineBreakMode = props.wrapLines ? NSLineBreakByWordWrapping : NSLineBreakByClipping;
-
-  [layoutManager addTextContainer:textContainer];
-  [textStorage addLayoutManager:layoutManager];
-  [layoutManager ensureLayoutForTextContainer:textContainer];
-
-  CGRect usedRect = [layoutManager usedRectForTextContainer:textContainer];
-  CGFloat measuredWidth = props.wrapLines && hasFiniteMaxWidth ? maxWidth : std::ceil(usedRect.size.width);
-  CGFloat measuredHeight = std::ceil(usedRect.size.height);
-
-  if (measuredHeight <= 0) {
-    measuredHeight = effectiveLineHeight(props);
-  }
-
-  return layoutConstraints.clamp(Size{
-      static_cast<Float>(measuredWidth),
-      static_cast<Float>(measuredHeight)});
+  return layoutConstraints.clamp(measuredSize);
 }
 
 } // namespace facebook::react
