@@ -46,6 +46,7 @@ static UIColor *SelectableCodeBlockColorFromString(NSString *colorString, UIColo
   CGFloat _lineHeight;
   BOOL _selectable;
   BOOL _wrapLines;
+  BOOL _needsTextUpdateAfterRecycle;
   std::vector<std::string> _menuOptionsVector;
 }
 
@@ -67,6 +68,7 @@ static UIColor *SelectableCodeBlockColorFromString(NSString *colorString, UIColo
     _lineHeight = 18.0;
     _selectable = YES;
     _wrapLines = NO;
+    _needsTextUpdateAfterRecycle = NO;
     _menuOptions = @[@"Copy"];
 
     SelectableCodeTextView *textView = [[SelectableCodeTextView alloc] init];
@@ -96,6 +98,7 @@ static UIColor *SelectableCodeBlockColorFromString(NSString *colorString, UIColo
   [super prepareForRecycle];
   _textView.attributedText = nil;
   _textView.selectedRange = NSMakeRange(0, 0);
+  _needsTextUpdateAfterRecycle = YES;
 }
 
 - (void)layoutSubviews
@@ -110,7 +113,7 @@ static UIColor *SelectableCodeBlockColorFromString(NSString *colorString, UIColo
   const auto &oldViewProps = *std::static_pointer_cast<SelectableCodeBlockViewProps const>(_props);
   const auto &newViewProps = *std::static_pointer_cast<SelectableCodeBlockViewProps const>(props);
 
-  BOOL needsTextUpdate = NO;
+  BOOL needsTextUpdate = _needsTextUpdateAfterRecycle;
 
   if (oldViewProps.tokensJson != newViewProps.tokensJson) {
     _tokensJson = [NSString stringWithUTF8String:newViewProps.tokensJson.c_str()];
@@ -160,6 +163,7 @@ static UIColor *SelectableCodeBlockColorFromString(NSString *colorString, UIColo
 
   if (needsTextUpdate) {
     [self updateAttributedText];
+    _needsTextUpdateAfterRecycle = NO;
   }
 
   [super updateProps:props oldProps:oldProps];
